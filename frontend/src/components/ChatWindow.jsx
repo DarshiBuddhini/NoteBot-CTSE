@@ -1,47 +1,28 @@
-import React, { useState } from 'react';
-import { Layout, Typography } from 'antd';
-import Message from './ChatMsg';
-import InputBox from './InputBox';
-
-const { Header, Content } = Layout;
-const { Title } = Typography;
+import React, { useState } from 'react'
+import ChatMsg from './ChatMsg'
+import InputBox from './InputBox'
 
 const ChatWindow = () => {
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState([])
 
-  const handleSend = async (text) => {
-    const userMessage = { sender: 'user', text };
-    setMessages((prev) => [...prev, userMessage]);
-
-    try {
-      const response = await fetch('http://localhost:5000/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text }),
-      });
-      const data = await response.json();
-      const botMessage = { sender: 'bot', text: data.response };
-      setMessages((prev) => [...prev, botMessage]);
-    } catch (error) {
-      console.error('Error fetching response:', error);
-    }
-  };
+  const handleSend = (msg) => {
+    setMessages((prev) => [...prev, { from: 'user', text: msg }])
+    // Simulate bot response (replace with actual LLM call)
+    setTimeout(() => {
+      setMessages((prev) => [...prev, { from: 'bot', text: "I'm your assistant!" }])
+    }, 1000)
+  }
 
   return (
-    <Layout style={{ height: '100vh' }}>
-      <Header>
-        <Title style={{ color: 'white', margin: 0 }} level={3}>
-          CTSE Lecture Chatbot
-        </Title>
-      </Header>
-      <Content style={{ padding: '20px', overflowY: 'auto' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '1rem' }}>
         {messages.map((msg, index) => (
-          <Message key={index} sender={msg.sender} text={msg.text} />
+          <ChatMsg key={index} from={msg.from} text={msg.text} />
         ))}
-      </Content>
-      <InputBox onSend={handleSend} />
-    </Layout>
-  );
-};
+      </div>
+      <InputBox onSend={handleSend} isFirstMessage={messages.length === 0} />
+    </div>
+  )
+}
 
-export default ChatWindow;
+export default ChatWindow
