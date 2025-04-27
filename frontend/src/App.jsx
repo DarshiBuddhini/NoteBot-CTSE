@@ -46,7 +46,7 @@ const App = () => {
           key: '2',
           label: 'GitHub Repository',
           icon: <GithubOutlined />,
-          onClick: () => window.open('https://github.com/your-repo', '_blank')
+          onClick: () => window.open('https://github.com/DarshiBuddhini/NoteBot-CTSE', '_blank')
         },
         {
           key: '3',
