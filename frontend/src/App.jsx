@@ -1,25 +1,34 @@
 import React, { useState, useEffect } from 'react'
-import { ConfigProvider, Switch, Layout, theme, Typography, Button, Dropdown, Menu } from 'antd'
-import { 
-  BulbOutlined, 
-  BulbFilled, 
-  MenuOutlined, 
+import { Switch } from 'antd';
+import { ConfigProvider, Layout, theme, Typography, Button, Dropdown, Menu, Select, Space, Divider, Tooltip, Badge } from 'antd'
+import {
+  BulbOutlined,
+  BulbFilled,
+  MenuOutlined,
   GithubOutlined,
   QuestionCircleOutlined,
-  FileTextOutlined
+  FileTextOutlined,
+  SendOutlined,
+  PlusOutlined,
+  DeleteOutlined,
+  HistoryOutlined,
+  SettingOutlined
 } from '@ant-design/icons'
 import ChatWindow from './components/ChatWindow'
 
 const { defaultAlgorithm, darkAlgorithm } = theme
-const { Title } = Typography
+const { Title, Text } = Typography
+const { Option } = Select
 
 const App = () => {
   const [darkMode, setDarkMode] = useState(() => {
-    // Check user's preferred color scheme
     return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
   })
   const [collapsed, setCollapsed] = useState(false)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+  const [selectedLecture, setSelectedLecture] = useState(null)
+  const [conversations, setConversations] = useState([])
+  const [activeConversation, setActiveConversation] = useState(null)
 
   useEffect(() => {
     const handleResize = () => {
@@ -32,6 +41,17 @@ const App = () => {
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
   }, [])
+
+  const lectures = [
+    { number: 1, title: "Introduction to Software Engineering" },
+    { number: 2, title: "Requirements Engineering" },
+    { number: 3, title: "System Modeling" },
+    { number: 4, title: "Architectural Design" },
+    { number: 5, title: "Design and Implementation" },
+    { number: 6, title: "Software Testing" },
+    { number: 7, title: "Software Evolution" },
+    { number: 8, title: "Project Management" },
+  ]
 
   const menu = (
     <Menu
@@ -58,6 +78,18 @@ const App = () => {
     />
   )
 
+  const handleNewChat = () => {
+    const newConversation = {
+      id: Date.now(),
+      title: `New Chat ${conversations.length + 1}`,
+      createdAt: new Date(),
+      messages: []
+    }
+    setConversations([newConversation, ...conversations])
+    setActiveConversation(newConversation.id)
+    setSelectedLecture(null)
+  }
+
   return (
     <ConfigProvider
       theme={{
@@ -78,10 +110,10 @@ const App = () => {
       }}
     >
       <Layout style={{ minHeight: '100vh' }}>
-        <Layout.Header 
-          style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
+        <Layout.Header
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
             alignItems: 'center',
             padding: isMobile ? '0 1rem' : '0 2rem',
             position: 'sticky',
@@ -91,9 +123,9 @@ const App = () => {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             {isMobile && (
-              <Button 
-                type="text" 
-                icon={<MenuOutlined />} 
+              <Button
+                type="text"
+                icon={<MenuOutlined />}
                 onClick={() => setCollapsed(!collapsed)}
                 style={{ color: 'white' }}
               />
@@ -102,21 +134,23 @@ const App = () => {
               <span role="img" aria-label="brain">🧠</span> CTSE NoteBot
             </Title>
           </div>
-          
+
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <div style={{ color: 'white', display: 'flex', alignItems: 'center' }}>
               {darkMode ? <BulbFilled /> : <BulbOutlined />}
-              <Switch 
-                checked={darkMode} 
+              <Switch
+                checked={darkMode}
                 onChange={() => setDarkMode(!darkMode)}
                 style={{ marginLeft: 8 }}
               />
             </div>
-            
-            <Dropdown overlay={menu} placement="bottomRight">
-              <Button 
-                type="text" 
-                icon={<MenuOutlined />} 
+
+
+
+            <Dropdown menu={menu} placement="bottomRight">
+              <Button
+                type="text"
+                icon={<SettingOutlined />}
                 style={{ color: 'white' }}
               />
             </Dropdown>
@@ -125,9 +159,9 @@ const App = () => {
 
         <Layout>
           {!isMobile && (
-            <Layout.Sider 
-              collapsible 
-              collapsed={collapsed} 
+            <Layout.Sider
+              collapsible
+              collapsed={collapsed}
               onCollapse={(value) => setCollapsed(value)}
               width={250}
               style={{
@@ -135,26 +169,97 @@ const App = () => {
                 borderRight: darkMode ? '1px solid #303030' : '1px solid #f0f0f0'
               }}
             >
-              {/* Add sidebar content here */}
-              <div style={{ padding: '1rem' }}>
-                <h3 style={{ color: darkMode ? 'rgba(255,255,255,0.85)' : 'rgba(0,0,0,0.85)' }}>
-                  {collapsed ? '...' : 'Chat History'}
-                </h3>
-                {/* Add chat history list here */}
+              <div style={{ padding: '1rem', height: '100%', display: 'flex', flexDirection: 'column' }}>
+                <Button
+                  type="primary"
+                  icon={<PlusOutlined />}
+                  onClick={handleNewChat}
+                  style={{ marginBottom: '1rem' }}
+                >
+                  New Chat
+                </Button>
+
+                <div style={{ flex: 1, overflowY: 'auto' }}>
+                  <Text strong style={{ color: darkMode ? 'rgba(255,255,255,0.85)' : 'rgba(0,0,0,0.85)' }}>
+                    Recent Conversations
+                  </Text>
+                  <Menu
+                    mode="inline"
+                    selectedKeys={activeConversation ? [activeConversation.toString()] : []}
+                    style={{ border: 'none', background: 'transparent' }}
+                    items={conversations.map(conv => ({
+                      key: conv.id,
+                      label: (
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <Text ellipsis>{conv.title}</Text>
+                          <Button
+                            type="text"
+                            icon={<DeleteOutlined />}
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setConversations(conversations.filter(c => c.id !== conv.id))
+                              if (activeConversation === conv.id) {
+                                setActiveConversation(null)
+                              }
+                            }}
+                          />
+                        </div>
+                      ),
+                      icon: <HistoryOutlined />,
+                      onClick: () => setActiveConversation(conv.id)
+                    }))}
+                  />
+                </div>
               </div>
             </Layout.Sider>
           )}
 
-          <Layout.Content style={{ 
+          <Layout.Content style={{
             padding: isMobile ? '1rem' : '2rem',
             background: darkMode ? '#1f1f1f' : '#f5f5f5'
           }}>
-            <div style={{ 
-              maxWidth: '1200px', 
+            <div style={{
+              maxWidth: '1200px',
               margin: '0 auto',
-              height: '100%'
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column'
             }}>
-              <ChatWindow darkMode={darkMode} />
+              <div style={{
+                marginBottom: '1rem',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <Text strong style={{ fontSize: '1.2rem' }}>
+                  {activeConversation ?
+                    conversations.find(c => c.id === activeConversation)?.title :
+                    "New Conversation"}
+                </Text>
+                <Select
+                  placeholder="Select CTSE Lecture"
+                  style={{ width: 300 }}
+                  value={selectedLecture}
+                  onChange={setSelectedLecture}
+                  optionLabelProp="label"
+                >
+                  {lectures.map(lecture => (
+                    <Option key={lecture.number} value={lecture.number} label={`Lecture ${lecture.number}`}>
+                      <Space>
+                        <Badge count={lecture.number} style={{ backgroundColor: darkMode ? '#1890ff' : '#1677ff' }} />
+                        <span>{lecture.title}</span>
+                      </Space>
+                    </Option>
+                  ))}
+                </Select>
+              </div>
+
+              <ChatWindow
+                darkMode={darkMode}
+                selectedLecture={selectedLecture}
+                style={{ flex: 1 }}
+              />
             </div>
           </Layout.Content>
         </Layout>
