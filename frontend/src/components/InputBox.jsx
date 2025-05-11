@@ -87,13 +87,7 @@ const InputBox = ({ onSend, disabled, darkMode, selectedLecture, onLectureChange
           ))}
         </Select>
         
-        <Tooltip title="Attach file">
-          <Button 
-            icon={<FileTextOutlined />} 
-            shape="circle" 
-            disabled={disabled}
-          />
-        </Tooltip>
+        
       </div>
       
       <div style={{ 
