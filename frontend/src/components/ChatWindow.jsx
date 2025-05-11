@@ -1,57 +1,83 @@
-import React, { useState, useEffect, useRef } from 'react'
-import ChatMsg from './ChatMsg'
-import InputBox from './InputBox'
-import { Button, Space, Typography, Card, Divider } from 'antd'
-import { SendOutlined, FileTextOutlined } from '@ant-design/icons'
+import React, { useState, useEffect, useRef } from 'react';
+import ChatMsg from './ChatMsg';
+import InputBox from './InputBox';
+import { Button, Space, Typography, Card, Divider, message } from 'antd';
+import { SendOutlined, FileTextOutlined } from '@ant-design/icons';
 
-const { Title, Text } = Typography
+const { Title, Text } = Typography;
 
-const ChatWindow = ({ darkMode, selectedLecture }) => {
-  const [messages, setMessages] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
-  const messagesEndRef = useRef(null)
+const ChatWindow = ({ darkMode, selectedLecture, onLectureChange }) => {
+  const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   useEffect(() => {
-    scrollToBottom()
-  }, [messages])
+    scrollToBottom();
+  }, [messages]);
 
   const handleSend = async (msg) => {
     try {
-      setLoading(true)
+      setLoading(true);
       const userMessage = { 
         from: 'user', 
         text: msg,
         timestamp: new Date().toISOString(),
         lecture: selectedLecture
+      };
+      
+      setMessages(prev => [...prev, userMessage]);
+      
+      const requestBody = {
+        question: msg,
+        history: messages
+          .filter(m => m.from === 'user' || m.from === 'bot')
+          .map(m => ({
+            role: m.from === 'user' ? 'user' : 'assistant',
+            content: m.text
+          }))
+      };
+
+      const response = await fetch(' http://localhost:5000/api/ask', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody)
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
+
+      const data = await response.json();
       
-      setMessages(prev => [...prev, userMessage])
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      const botMessage = { 
+        from: 'bot', 
+        text: data.answer,
+        timestamp: new Date().toISOString(),
+        sources: [
+          { title: "CTSE Textbook", page: "N/A" }
+        ]
+      };
       
-      // Simulate API call with timeout
-      setTimeout(() => {
-        const botMessage = { 
-          from: 'bot', 
-          text: `This is a simulated response about CTSE Lecture ${selectedLecture}. In a real implementation, this would be the API response.`,
-          timestamp: new Date().toISOString(),
-          sources: [
-            { title: "CTSE Textbook Chapter 3", page: 45 },
-            { title: "Lecture Slides Week 4", slide: 12 }
-          ]
-        }
-        setMessages(prev => [...prev, botMessage])
-        setLoading(false)
-      }, 1500)
+      setMessages(prev => [...prev, botMessage]);
+      setLoading(false);
     } catch (err) {
-      setError('Failed to get response')
-      console.error(err)
-      setLoading(false)
+      console.error('API call failed:', err);
+      message.error('Failed to get response from server');
+      setError(err.message);
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div style={{ 
@@ -148,11 +174,14 @@ const ChatWindow = ({ darkMode, selectedLecture }) => {
                 darkMode={darkMode}
                 timestamp={msg.timestamp}
                 sources={msg.sources}
+                isLoading={loading && index === messages.length - 1 && msg.from === 'bot'}
               />
               {index < messages.length - 1 && <Divider style={{ margin: '8px 0' }} />}
             </React.Fragment>
           ))}
-          {loading && <ChatMsg from="bot" text="Thinking..." darkMode={darkMode} />}
+          {loading && messages[messages.length - 1]?.from !== 'bot' && (
+            <ChatMsg from="bot" text="" darkMode={darkMode} isLoading={true} />
+          )}
           {error && <div className="error-message">{error}</div>}
           <div ref={messagesEndRef} />
         </div>
@@ -160,13 +189,13 @@ const ChatWindow = ({ darkMode, selectedLecture }) => {
       
       <InputBox 
         onSend={handleSend} 
-        isFirstMessage={messages.length === 0} 
         disabled={loading}
         darkMode={darkMode}
         selectedLecture={selectedLecture}
+        onLectureChange={onLectureChange}
       />
     </div>
-  )
-}
+  );
+};
 
-export default ChatWindow
+export default ChatWindow;

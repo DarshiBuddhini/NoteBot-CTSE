@@ -1,15 +1,16 @@
-import React, { useState,useRef } from 'react'
-import { Input, Button, Select, Space, Tooltip, Badge } from 'antd'
-import { SendOutlined, FileTextOutlined, PlusOutlined } from '@ant-design/icons'
+import React, { useState, useRef } from 'react';
+import { Input, Button, Select, Space, Tooltip, Badge } from 'antd';
+import { SendOutlined, FileTextOutlined } from '@ant-design/icons';
 import { Typography } from 'antd';
-const { Text } = Typography;
-const { TextArea } = Input
-const { Option } = Select
 
-const InputBox = ({ onSend, disabled, darkMode, selectedLecture }) => {
-  const [value, setValue] = useState('')
-  const [isFocused, setIsFocused] = useState(false)
-  const textAreaRef = useRef(null)
+const { Text } = Typography;
+const { TextArea } = Input;
+const { Option } = Select;
+
+const InputBox = ({ onSend, disabled, darkMode, selectedLecture, onLectureChange }) => {
+  const [value, setValue] = useState('');
+  const [isFocused, setIsFocused] = useState(false);
+  const textAreaRef = useRef(null);
 
   const lectures = [
     { number: 1, title: "Introduction to Software Engineering" },
@@ -20,27 +21,27 @@ const InputBox = ({ onSend, disabled, darkMode, selectedLecture }) => {
     { number: 6, title: "Software Testing" },
     { number: 7, title: "Software Evolution" },
     { number: 8, title: "Project Management" },
-  ]
+  ];
 
   const handleSend = () => {
-    if (!value.trim()) return
-    onSend(value)
-    setValue('')
-  }
+    if (!value.trim()) return;
+    onSend(value);
+    setValue('');
+  };
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      handleSend()
+      e.preventDefault();
+      handleSend();
     }
-  }
+  };
 
   const containerStyle = {
     padding: '1rem',
     borderTop: `1px solid ${darkMode ? '#303030' : '#d9d9d9'}`,
     backgroundColor: darkMode ? '#1f1f1f' : '#fff',
     borderRadius: '0 0 8px 8px'
-  }
+  };
 
   const inputStyle = {
     width: '100%',
@@ -51,7 +52,7 @@ const InputBox = ({ onSend, disabled, darkMode, selectedLecture }) => {
     boxShadow: isFocused ? `0 0 0 2px ${darkMode ? 'rgba(24, 144, 255, 0.2)' : 'rgba(22, 119, 255, 0.2)'}` : 'none',
     resize: 'none',
     transition: 'all 0.3s'
-  }
+  };
 
   return (
     <div style={containerStyle}>
@@ -65,6 +66,7 @@ const InputBox = ({ onSend, disabled, darkMode, selectedLecture }) => {
           placeholder="Select Lecture"
           style={{ width: 200 }}
           value={selectedLecture}
+          onChange={onLectureChange}
           optionLabelProp="label"
           disabled={disabled}
         >
@@ -131,7 +133,7 @@ const InputBox = ({ onSend, disabled, darkMode, selectedLecture }) => {
         </Text>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default InputBox
+export default InputBox;

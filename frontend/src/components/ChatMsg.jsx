@@ -1,42 +1,220 @@
-import React, { useState, useEffect } from 'react'
-import ReactMarkdown from 'react-markdown'
-import { Avatar, Typography, Card, Space, Tag, Tooltip } from 'antd'
-import { UserOutlined, RobotOutlined, CopyOutlined, CheckOutlined } from '@ant-design/icons'
-import { Prism as SyntaxHighlighter } from 'prism-react-renderer'
-import { CopyToClipboard } from 'react-copy-to-clipboard'
+import React, { useState, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
+import { Avatar, Typography, Space, Tag, Tooltip } from 'antd';
+import { UserOutlined, RobotOutlined, CopyOutlined, CheckOutlined } from '@ant-design/icons';
+import { Prism as SyntaxHighlighter } from 'prism-react-renderer';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 
-const { Text } = Typography
+const { Text } = Typography;
 
-const ChatMsg = ({ from, text, darkMode, timestamp, sources }) => {
-  const [displayText, setDisplayText] = useState('')
-  const [typing, setTyping] = useState(false)
-  const [copied, setCopied] = useState(false)
-  const isUser = from === 'user'
+const lightTheme = {
+  plain: {
+    color: '#393A34',
+    backgroundColor: '#f6f8fa',
+  },
+  styles: [
+    {
+      types: ['comment', 'prolog', 'doctype', 'cdata'],
+      style: {
+        color: '#999988',
+        fontStyle: 'italic',
+      },
+    },
+    {
+      types: ['namespace'],
+      style: {
+        opacity: 0.7,
+      },
+    },
+    {
+      types: ['string', 'attr-value'],
+      style: {
+        color: '#e3116c',
+      },
+    },
+    {
+      types: ['punctuation', 'operator'],
+      style: {
+        color: '#393A34',
+      },
+    },
+    {
+      types: ['entity', 'url', 'symbol', 'number', 'boolean', 'variable', 'constant', 'property', 'regex', 'inserted'],
+      style: {
+        color: '#36acaa',
+      },
+    },
+    {
+      types: ['atrule', 'keyword', 'attr-name', 'selector'],
+      style: {
+        color: '#00a4db',
+      },
+    },
+    {
+      types: ['function', 'deleted', 'tag'],
+      style: {
+        color: '#d73a49',
+      },
+    },
+    {
+      types: ['function-variable'],
+      style: {
+        color: '#6f42c1',
+      },
+    },
+    {
+      types: ['tag', 'selector', 'keyword'],
+      style: {
+        color: '#00009f',
+      },
+    },
+  ],
+};
+
+const darkTheme = {
+  plain: {
+    color: '#f8f8f2',
+    backgroundColor: '#282a36',
+  },
+  styles: [
+    {
+      types: ['comment', 'prolog', 'doctype', 'cdata'],
+      style: {
+        color: '#6272a4',
+      },
+    },
+    {
+      types: ['punctuation'],
+      style: {
+        color: '#f8f8f2',
+      },
+    },
+    {
+      types: ['property', 'tag', 'constant', 'symbol', 'deleted'],
+      style: {
+        color: '#ff79c6',
+      },
+    },
+    {
+      types: ['boolean', 'number'],
+      style: {
+        color: '#bd93f9',
+      },
+    },
+    {
+      types: ['selector', 'attr-name', 'string', 'char', 'builtin', 'inserted'],
+      style: {
+        color: '#50fa7b',
+      },
+    },
+    {
+      types: ['operator', 'entity', 'url', 'variable'],
+      style: {
+        color: '#f8f8f2',
+      },
+    },
+    {
+      types: ['atrule', 'attr-value', 'function'],
+      style: {
+        color: '#f1fa8c',
+      },
+    },
+    {
+      types: ['keyword'],
+      style: {
+        color: '#8be9fd',
+      },
+    },
+    {
+      types: ['regex', 'important'],
+      style: {
+        color: '#ffb86c',
+      },
+    },
+  ],
+};
+
+const ChatMsg = ({ from, text, darkMode, timestamp, sources, isLoading }) => {
+  const [displayText, setDisplayText] = useState('');
+  const [typing, setTyping] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const isUser = from === 'user';
 
   useEffect(() => {
-    if (isUser) {
-      setDisplayText(text)
-      return
+    if (isUser || isLoading) {
+      setDisplayText(text || '');
+      return;
     }
     
-    setTyping(true)
-    let i = 0
+    setTyping(true);
+    let i = 0;
     const typingInterval = setInterval(() => {
       if (i < text.length) {
-        setDisplayText(text.substring(0, i + 1))
-        i++
+        setDisplayText(text.substring(0, i + 1));
+        i++;
       } else {
-        clearInterval(typingInterval)
-        setTyping(false)
+        clearInterval(typingInterval);
+        setTyping(false);
       }
-    }, 10)
+    }, 10);
 
-    return () => clearInterval(typingInterval)
-  }, [text, isUser])
+    return () => clearInterval(typingInterval);
+  }, [text, isUser, isLoading]);
 
   const handleCopy = () => {
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  if (isLoading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'flex-start', 
+        marginBottom: '12px',
+        gap: '8px'
+      }}>
+        <Avatar 
+          icon={<RobotOutlined />} 
+          style={{ 
+            backgroundColor: darkMode ? '#1890ff' : '#1677ff',
+            color: '#fff'
+          }} 
+        />
+        <div style={{ 
+          background: darkMode ? '#2a2a2a' : '#f5f5f5',
+          color: darkMode ? 'rgba(255,255,255,0.85)' : 'rgba(0,0,0,0.85)',
+          padding: '12px 16px',
+          borderRadius: '18px',
+          borderTopLeftRadius: '4px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}>
+          <div style={{ 
+            width: '8px',
+            height: '8px',
+            borderRadius: '50%',
+            background: darkMode ? '#8be9fd' : '#1677ff',
+            animation: 'pulse 1.5s infinite'
+          }} />
+          <div style={{ 
+            width: '8px',
+            height: '8px',
+            borderRadius: '50%',
+            background: darkMode ? '#8be9fd' : '#1677ff',
+            animation: 'pulse 1.5s infinite 0.3s'
+          }} />
+          <div style={{ 
+            width: '8px',
+            height: '8px',
+            borderRadius: '50%',
+            background: darkMode ? '#8be9fd' : '#1677ff',
+            animation: 'pulse 1.5s infinite 0.6s'
+          }} />
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -110,7 +288,7 @@ const ChatMsg = ({ from, text, darkMode, timestamp, sources }) => {
             {displayText}
           </ReactMarkdown>
           
-          {typing && (
+          {typing && !isLoading && (
             <div style={{ 
               display: 'inline-block',
               marginLeft: '8px',
@@ -161,24 +339,7 @@ const ChatMsg = ({ from, text, darkMode, timestamp, sources }) => {
         />
       )}
     </div>
-  )
-}
+  );
+};
 
-// You'll need to define your lightTheme and darkTheme for SyntaxHighlighter
-const lightTheme = {
-  plain: {
-    color: '#393A34',
-    backgroundColor: '#f6f8fa',
-  },
-  // ... other styles
-}
-
-const darkTheme = {
-  plain: {
-    color: '#f8f8f2',
-    backgroundColor: '#282a36',
-  },
-  // ... other styles
-}
-
-export default ChatMsg
+export default ChatMsg;
