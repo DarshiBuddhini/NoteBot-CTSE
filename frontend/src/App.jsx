@@ -43,15 +43,21 @@ const App = () => {
   }, [])
 
   const lectures = [
-    { number: 1, title: "Introduction to Software Engineering" },
-    { number: 2, title: "Requirements Engineering" },
-    { number: 3, title: "System Modeling" },
-    { number: 4, title: "Architectural Design" },
-    { number: 5, title: "Design and Implementation" },
-    { number: 6, title: "Software Testing" },
-    { number: 7, title: "Software Evolution" },
-    { number: 8, title: "Project Management" },
-  ]
+  { number: 1, title: "Lecture 1 - Part 1 - Intro to DevOps and Beyond" },
+  { number: 2, title: "Lecture 1 - Part 2 - Containers 101" },
+  { number: 3, title: "Lecture 2 - Part 1" },
+  { number: 4, title: "Lecture 2 - Part 2" },
+  { number: 5, title: "Lecture 3 - Part 1 - Introduction to AWS Cloud Platform" },
+  { number: 6, title: "Lecture 3 - Part 2 - Cloud Computing 101" },
+  { number: 7, title: "Lecture 4 - Part 1 - CAP Theorem" },
+  { number: 8, title: "Lecture 4 - Part 2 - Cloud Computing Concepts" },
+  { number: 9, title: "Lecture 4 - Part 3 - Key Essentials for Building Application" },
+  { number: 10, title: "Lecture 5 - Part 1 - Introduction to Microservices" },
+  { number: 11, title: "Lecture 5 - Part 2 - Microservice Design Patterns" },
+  { number: 12, title: "Lecture 07 - Introduction to AI ML" },
+  { number: 13, title: "Lecture 7 ML - Part 1" },
+  { number: 14, title: "Lecture 7 - ML - Part 2 - LLM" }
+];
 
   const menu = (
     <Menu

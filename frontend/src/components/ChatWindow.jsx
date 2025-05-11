@@ -23,15 +23,15 @@ const ChatWindow = ({ darkMode, selectedLecture, onLectureChange }) => {
   const handleSend = async (msg) => {
     try {
       setLoading(true);
-      const userMessage = { 
-        from: 'user', 
+      const userMessage = {
+        from: 'user',
         text: msg,
         timestamp: new Date().toISOString(),
         lecture: selectedLecture
       };
-      
+
       setMessages(prev => [...prev, userMessage]);
-      
+
       const requestBody = {
         question: msg,
         history: messages
@@ -55,20 +55,20 @@ const ChatWindow = ({ darkMode, selectedLecture, onLectureChange }) => {
       }
 
       const data = await response.json();
-      
+
       if (data.error) {
         throw new Error(data.error);
       }
 
-      const botMessage = { 
-        from: 'bot', 
+      const botMessage = {
+        from: 'bot',
         text: data.answer,
         timestamp: new Date().toISOString(),
         sources: [
           { title: "CTSE Textbook", page: "N/A" }
         ]
       };
-      
+
       setMessages(prev => [...prev, botMessage]);
       setLoading(false);
     } catch (err) {
@@ -80,20 +80,20 @@ const ChatWindow = ({ darkMode, selectedLecture, onLectureChange }) => {
   };
 
   return (
-    <div style={{ 
-      display: 'flex', 
-      flexDirection: 'column', 
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
       height: '100%',
       background: darkMode ? '#1f1f1f' : '#f5f5f5',
       borderRadius: '8px',
       overflow: 'hidden'
     }}>
       {messages.length === 0 ? (
-        <div style={{ 
-          flex: 1, 
-          display: 'flex', 
-          flexDirection: 'column', 
-          justifyContent: 'center', 
+        <div style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
           alignItems: 'center',
           padding: '2rem',
           textAlign: 'center'
@@ -102,13 +102,13 @@ const ChatWindow = ({ darkMode, selectedLecture, onLectureChange }) => {
             CTSE NoteBot Assistant
           </Title>
           <Text type="secondary" style={{ marginBottom: '2rem', maxWidth: '600px' }}>
-            Ask me anything about the CTSE lectures. I can help explain concepts, 
+            Ask me anything about the CTSE lectures. I can help explain concepts,
             summarize content, and provide additional resources.
           </Text>
-          
+
           <Space wrap style={{ marginBottom: '2rem' }}>
-            <Card 
-              size="small" 
+            <Card
+              size="small"
               hoverable
               onClick={() => handleSend("Summarize the key points from the last lecture")}
               style={{ width: 200 }}
@@ -116,8 +116,8 @@ const ChatWindow = ({ darkMode, selectedLecture, onLectureChange }) => {
               <Text strong>📝 Summary</Text>
               <Text type="secondary" style={{ display: 'block' }}>Get lecture summary</Text>
             </Card>
-            <Card 
-              size="small" 
+            <Card
+              size="small"
               hoverable
               onClick={() => handleSend("Explain the software development lifecycle")}
               style={{ width: 200 }}
@@ -125,8 +125,8 @@ const ChatWindow = ({ darkMode, selectedLecture, onLectureChange }) => {
               <Text strong>🤔 Explain</Text>
               <Text type="secondary" style={{ display: 'block' }}>Explain a concept</Text>
             </Card>
-            <Card 
-              size="small" 
+            <Card
+              size="small"
               hoverable
               onClick={() => handleSend("Provide examples of requirements engineering")}
               style={{ width: 200 }}
@@ -137,15 +137,15 @@ const ChatWindow = ({ darkMode, selectedLecture, onLectureChange }) => {
           </Space>
         </div>
       ) : (
-        <div style={{ 
-          flex: 1, 
-          overflowY: 'auto', 
+        <div style={{
+          flex: 1,
+          overflowY: 'auto',
           padding: '1rem',
           background: darkMode ? '#1f1f1f' : '#fff',
           borderRadius: '8px 8px 0 0'
         }}>
           {selectedLecture && (
-            <div style={{ 
+            <div style={{
               marginBottom: '1rem',
               padding: '0.5rem 1rem',
               background: darkMode ? '#2a2a2a' : '#f0f0f0',
@@ -153,24 +153,31 @@ const ChatWindow = ({ darkMode, selectedLecture, onLectureChange }) => {
             }}>
               <Text strong>Lecture {selectedLecture}: {
                 [
-                  "Introduction to Software Engineering",
-                  "Requirements Engineering",
-                  "System Modeling",
-                  "Architectural Design",
-                  "Design and Implementation",
-                  "Software Testing",
-                  "Software Evolution",
-                  "Project Management"
-                ][selectedLecture - 1]
-              }</Text>
+                  "Lecture 1 - Part 1 - Intro to DevOps and Beyond",
+                  "Lecture 1 - Part 2 - Containers 101",
+                  "Lecture 2 - Part 1",
+                  "Lecture 2 - Part 2",
+                  "Lecture 3 - Part 1 - Introduction to AWS Cloud Platform",
+                  "Lecture 3 - Part 2 - Cloud Computing 101",
+                  "Lecture 4 - Part 1 - CAP Theorem",
+                  "Lecture 4 - Part 2 - Cloud Computing Concepts",
+                  "Lecture 4 - Part 3 - Key Essentials for Building Application",
+                  "Lecture 5 - Part 1 - Introduction to Microservices",
+                  "Lecture 5 - Part 2 - Microservice Design Patterns",
+                  "Lecture 07 - Introduction to AI ML",
+                  "Lecture 7 ML - Part 1",
+                  "Lecture 7 - ML - Part 2 - LLM"
+                ][selectedLecture - 1]}
+              </Text>
+
             </div>
           )}
-          
+
           {messages.map((msg, index) => (
             <React.Fragment key={index}>
-              <ChatMsg 
-                from={msg.from} 
-                text={msg.text} 
+              <ChatMsg
+                from={msg.from}
+                text={msg.text}
                 darkMode={darkMode}
                 timestamp={msg.timestamp}
                 sources={msg.sources}
@@ -186,9 +193,9 @@ const ChatWindow = ({ darkMode, selectedLecture, onLectureChange }) => {
           <div ref={messagesEndRef} />
         </div>
       )}
-      
-      <InputBox 
-        onSend={handleSend} 
+
+      <InputBox
+        onSend={handleSend}
         disabled={loading}
         darkMode={darkMode}
         selectedLecture={selectedLecture}
